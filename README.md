@@ -238,4 +238,4 @@ To modify the worker:
 
 ## License
 
-[Your License Here]
+[MIT License](./LICENSE) 
