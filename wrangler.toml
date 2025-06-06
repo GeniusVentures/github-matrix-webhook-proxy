@@ -1,0 +1,26 @@
+name = "github-matrix-webhook-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Your worker will be available at https://github-matrix-webhook-proxy.<your-subdomain>.workers.dev
+# Or you can set up a custom domain
+
+[vars]
+# Set your Matrix room ID here
+MATRIX_ROOM_ID = "!uNNEbdHQTSqsjqnKEi:matrix.org"
+
+# Example for public rooms:
+# MATRIX_ROOM_ID = "!uNNEbdHQTSqsjqnKEi:matrix.org"
+# For private rooms, use the internal room ID, not the alias
+
+[[env.production.routes]]
+pattern = "*gnus.ai/webhook"
+zone_name = "gnus.ai"
+
+# For development/testing, you can also use the workers.dev subdomain
+# [[routes]]
+# pattern = "github-matrix-webhook-proxy.*.workers.dev/*"
+
+# Secrets should be set via wrangler secret
+# Run: wrangler secret put MATRIX_TOKEN
+# Then paste your Matrix bearer token when prompted
