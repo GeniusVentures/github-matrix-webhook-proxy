@@ -67,10 +67,29 @@ Update `wrangler.toml` with your settings:
 The worker uses two secrets that need to be added via Cloudflare's secret management:
 
 #### Matrix Token
+
+**Option 1: Use the login script (Recommended)**
+```bash
+npm run matrix-login
+```
+
+This interactive script will:
+- Prompt for your Matrix credentials
+- Login with refresh_token disabled for stability
+- Show you the access token
+- Optionally set it in Cloudflare automatically
+
+**Option 2: Manual token setup**
 ```bash
 npx wrangler secret put MATRIX_TOKEN
 ```
 When prompted, paste your Matrix access token.
+
+**Note about token stability:**
+- Matrix tokens can expire or change when you log in/out
+- The login script creates a stable token by disabling refresh tokens
+- Keep the "GitHub Webhook Bot" device logged in to maintain token validity
+- Consider using a dedicated bot account for maximum stability
 
 #### GitHub Webhook Secret
 ```bash
@@ -82,6 +101,8 @@ When prompted, paste a secure secret string. You'll use this same secret when co
 ```bash
 # On Linux/Mac:
 openssl rand -hex 32
+# or
+openssl rand -base64 32
 
 # Or use any password generator to create a long random string
 ```
@@ -125,9 +146,14 @@ yarn deploy
      - Custom domain: `https://your-domain.com/webhook/`
      - Workers.dev: `https://github-matrix-webhook-proxy.<your-subdomain>.workers.dev/webhook/`
    - **Content type**: `application/json`
-   - **Secret**: Leave empty (the worker doesn't validate GitHub secrets)
-   - **Events**: Choose which events you want to forward
+   - **Secret**: Enter the same secret you used for `GITHUB_WEBHOOK_SECRET`
+   - **SSL verification**: Enable (recommended)
+   - **Events**: Choose which events you want to forward:
+     - Recommended: Issues, Pull requests, Push, Workflow runs
+     - Or select "Send me everything"
 4. Click "Add webhook"
+
+GitHub will send a ping event to verify the webhook is working.
 
 ## Configuration
 
@@ -211,14 +237,19 @@ npx wrangler tail
 
 The worker currently formats these GitHub webhook events:
 
+- **Repository Events**: Created, deleted, archived, unarchived, publicized, privatized, renamed, transferred
 - **Workflow Runs**: Shows status with emojis (✅ success, ❌ failure, ⚠️ cancelled)
-- **Pull Requests**: Open, close, merge, synchronize actions
-- **Issues**: Create, close, reopen actions  
+- **Pull Requests**: Open, close, merge, synchronize, reopen actions
+- **Issues**: Create, close, reopen, assign, label actions  
 - **Comments**: On issues and pull requests with preview text
 - **Pushes**: Number of commits and branch
-- **Releases**: New release notifications
+- **Releases**: Published, created, edited, deleted
+- **Branch/Tag Events**: Create and delete
+- **Stars**: Star and unstar events
+- **Forks**: Repository fork events
+- **Labels**: Create, edit, delete (filtered for ghost users during repo creation)
 
-Other events will show a generic message.
+Other events will show a generic message with event type information.
 
 ## Security Notes
 
@@ -232,10 +263,29 @@ Other events will show a generic message.
 
 To modify the worker:
 
-1. Edit `src/index.ts`
+1. Edit the TypeScript files in `src/`
 2. Test locally: `npx wrangler dev`
 3. Deploy changes: `npm run deploy`
 
+### Project Structure
+
+```
+src/
+├── index.ts          # Main worker entry point
+├── types.ts          # TypeScript type definitions
+├── utils.ts          # Utility functions (signature verification, etc.)
+├── event-config.ts   # Event configuration and templates
+├── event-handlers.ts # Complex event handler functions
+└── formatter.ts      # Message formatting logic
+```
+
+## Scripts
+
+- `npm run deploy` - Deploy the worker to Cloudflare
+- `npm run dev` - Run the worker locally for testing
+- `npm run tail` - View real-time logs from the deployed worker
+- `npm run matrix-login` - Interactive script to get a stable Matrix token
+
 ## License
 
-[MIT License](./LICENSE) 
+MIT License - See [LICENSE](LICENSE) file for details

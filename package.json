@@ -1,18 +1,28 @@
 {
   "name": "github-matrix-webhook-proxy",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "1.2.1",
+  "description": "Cloudflare Worker to proxy GitHub webhooks to Matrix rooms",
+  "main": "src/index.ts",
   "scripts": {
     "deploy": "wrangler deploy",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "wrangler dev",
+    "tail": "wrangler tail",
+    "matrix-login": "tsx src/matrix-login.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "cloudflare-workers",
+    "github-webhooks",
+    "matrix",
+    "webhook-proxy"
+  ],
+  "author": "GeniusVentures",
+  "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250605.0",
-    "typescript": "^5.8.3",
-    "wrangler": "^4.19.1"
+    "@cloudflare/workers-types": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "prompts": "^2.4.2",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
   }
 }
