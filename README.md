@@ -289,3 +289,21 @@ src/
 ## License
 
 MIT License - See [LICENSE](LICENSE) file for details
+
+
+## Deployment-specific filtering
+
+This repository provides a generic, optional webhook filtering engine. Keep
+organization-specific policy in a private deployment repository or in
+Cloudflare environment variables.
+
+Set `GITHUB_ORG` to reject payloads from other organizations and set
+`WEBHOOK_FILTER_CONFIG` to a versioned JSON object. If the configuration is
+missing, immediate webhook delivery remains allow-all for backward
+compatibility. Repository inclusion defaults to every repository; exclusions
+always win. Rules are evaluated in order and the first match wins.
+
+See [`config/filter-config.example.json`](config/filter-config.example.json)
+for the complete configuration shape. Supported rule selectors include event,
+action, repository, branch, actor, workflow name, workflow trigger, workflow
+conclusion, and commit-message wildcard patterns.

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "immediate": {
+    "repositories": {
+      "include": [],
+      "exclude": []
+    },
+    "defaultAction": "allow",
+    "rules": [
+      {
+        "name": "ignore-successful-scheduled-workflows",
+        "action": "deny",
+        "events": ["workflow_run"],
+        "workflowTriggers": ["schedule"],
+        "workflowConclusions": ["success"]
+      }
+    ]
+  },
+  "standup": {
+    "repositories": {
+      "include": [],
+      "exclude": []
+    },
+    "defaultAction": "allow",
+    "rules": []
+  }
+}
