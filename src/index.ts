@@ -1,8 +1,13 @@
 // src/index.ts
+import { evaluateImmediateFilter, parseFilterConfig } from './filters.js';
+import type { WebhookFilterConfig } from './filters.js';
+
 export interface Env {
   MATRIX_TOKEN: string;
   MATRIX_ROOM_ID: string;
   GITHUB_WEBHOOK_SECRET: string;
+  GITHUB_ORG?: string;
+  WEBHOOK_FILTER_CONFIG?: string | WebhookFilterConfig;
 }
 
 interface MatrixMessage {
@@ -528,6 +533,45 @@ export default {
         });
       }
       
+      // Apply deployment-configured filtering after signature verification.
+      // Missing configuration preserves the existing allow-all behavior.
+      try {
+        const filterConfig = parseFilterConfig(env.WEBHOOK_FILTER_CONFIG);
+        const decision = evaluateImmediateFilter(
+          eventType,
+          githubPayload,
+          filterConfig,
+          env.GITHUB_ORG,
+        );
+
+        if (!decision.allowed) {
+          console.log('Filtered GitHub event:', {
+            eventType,
+            repository: githubPayload.repository?.full_name,
+            reason: decision.reason,
+            rule: decision.rule,
+          });
+
+          return new Response(JSON.stringify({
+            status: 'filtered',
+            reason: decision.reason,
+            rule: decision.rule,
+          }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+      } catch (error) {
+        console.error('Invalid webhook filter configuration:', error);
+        return new Response(JSON.stringify({
+          status: 'configuration_error',
+          error: error instanceof Error ? error.message : 'Invalid webhook filter configuration',
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      
       // Transform GitHub event to Matrix message format
       const matrixContent = formatGitHubEvent(eventType, githubPayload);
       
@@ -544,8 +588,6 @@ export default {
       
       console.log('Sending to Matrix:', matrixUrl);
       console.log('Token exists:', !!env.MATRIX_TOKEN);
-      console.log('Token length:', env.MATRIX_TOKEN?.length);
-      console.log('First 10 chars of token:', env.MATRIX_TOKEN?.substring(0, 10) + '...');
       
       // Send to Matrix
       const matrixResponse = await fetch(matrixUrl, {
