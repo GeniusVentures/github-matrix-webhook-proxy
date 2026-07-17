@@ -9,7 +9,7 @@
     "tail": "wrangler tail",
     "matrix-login": "tsx src/matrix-login.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/**/*.test.ts"
+    "test": "tsx --test src/*.test.ts"
   },
   "keywords": [
     "cloudflare-workers",
