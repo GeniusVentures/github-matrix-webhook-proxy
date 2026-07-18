@@ -2,7 +2,7 @@
 // src/matrix-login.ts
 // Script to login to Matrix and get a stable access token
 
-import prompts from 'prompts';
+import prompts, { type PromptObject } from 'prompts';
 
 interface MatrixLoginResponse {
   access_token: string;
@@ -31,7 +31,7 @@ async function main() {
 
   try {
     // Get user input using prompts library
-    const questions = [
+    const questions: PromptObject[] = [
       {
         type: 'text',
         name: 'homeserver',

@@ -3,13 +3,14 @@
     "target": "ES2021",
     "module": "ES2022",
     "lib": ["ES2021"],
-    "types": ["@cloudflare/workers-types"],
+    "types": ["node"],
     "moduleResolution": "node",
     "noEmit": true,
-    "strict": true
+    "strict": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
-    "src/index.ts",
-    "src/filters.ts"
+    "src/matrix-login.ts",
+    "src/**/*.test.ts"
   ]
 }
